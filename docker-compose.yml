@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: wishlist-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: wishlist
+    command: mongod --quiet
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - wishlist-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wishlist-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/wishlist
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - wishlist-network
+
+networks:
+  wishlist-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
