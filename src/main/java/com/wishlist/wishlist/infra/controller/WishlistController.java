@@ -5,13 +5,17 @@ import com.wishlist.wishlist.application.usecase.AddItemUseCase;
 import com.wishlist.wishlist.application.usecase.GetWishlistItemsUseCase;
 import com.wishlist.wishlist.application.usecase.ItemExistsInWishlistUseCase;
 import com.wishlist.wishlist.application.usecase.RemoveItemUseCase;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/wishlist")
 @RequiredArgsConstructor
+@Validated
 public class WishlistController {
 
     private final AddItemUseCase addItemUseCase;
@@ -20,15 +24,15 @@ public class WishlistController {
     private final ItemExistsInWishlistUseCase itemExistsInWishlistUseCase;
 
     @PostMapping("/item")
-    public ResponseEntity<AddItemOutput> addItem(@RequestBody AddItemInput input) {
+    public ResponseEntity<AddItemOutput> addItem(@Valid @RequestBody AddItemInput input) {
         AddItemOutput output = addItemUseCase.execute(input);
         return ResponseEntity.ok(output);
     }
 
     @DeleteMapping("/{userId}/items/{itemId}")
     public ResponseEntity<Void> removeItem(
-            @PathVariable String userId,
-            @PathVariable String itemId
+            @PathVariable @NotBlank(message = "UserId is required") String userId,
+            @PathVariable @NotBlank(message = "ItemId is required") String itemId
     ) {
         RemoveItemInput input = RemoveItemInput.builder()
                 .userId(userId)
@@ -39,7 +43,8 @@ public class WishlistController {
     }
 
     @GetMapping("/{userId}/items")
-    public ResponseEntity<GetWishlistItemsOutput> getItems(@PathVariable String userId) {
+    public ResponseEntity<GetWishlistItemsOutput> getItems(
+            @PathVariable @NotBlank(message = "UserId is required") String userId) {
         GetWishlistItemsInput input = new GetWishlistItemsInput();
         input.setUserId(userId);
         return ResponseEntity.ok(getWishlistItemsUseCase.execute(input));
@@ -47,8 +52,8 @@ public class WishlistController {
 
     @GetMapping("/{userId}/items/{itemId}")
     public ResponseEntity<ContainsItemOutput> contains(
-            @PathVariable String userId,
-            @PathVariable String itemId
+            @PathVariable @NotBlank(message = "UserId is required") String userId,
+            @PathVariable @NotBlank(message = "ItemId is required") String itemId
     ) {
         ContainsItemInput input = ContainsItemInput.builder()
                 .userId(userId)
