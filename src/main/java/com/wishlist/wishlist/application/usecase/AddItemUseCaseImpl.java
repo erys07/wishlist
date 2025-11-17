@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
 @Service
 @RequiredArgsConstructor
 public class AddItemUseCaseImpl implements AddItemUseCase {
@@ -32,7 +30,6 @@ public class AddItemUseCaseImpl implements AddItemUseCase {
         Wishlist wishlist = wishlistService.findWishlist(input.getUserId())
                 .orElse(Wishlist.builder()
                         .userId(input.getUserId())
-                        .items(new ArrayList<>())
                         .build());
 
         if (wishlist.getId() == null) {

@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -22,17 +21,10 @@ public class WishlistService {
         log.debug("Finding wishlist for userId: {}", userId);
         Optional<Wishlist> wishlistOpt = wishlistRepository.findByUserId(userId);
         wishlistOpt.ifPresent(wishlist -> {
-            ensureItemsInitialized(wishlist);
             log.debug("Found wishlist - wishlistId: {}, items count: {}", 
                     wishlist.getId(), wishlist.getItems().size());
         });
         return wishlistOpt;
-    }
-
-    private void ensureItemsInitialized(Wishlist wishlist) {
-        if (wishlist.getItems() == null) {
-            wishlist.setItems(new ArrayList<>());
-        }
     }
 }
 
