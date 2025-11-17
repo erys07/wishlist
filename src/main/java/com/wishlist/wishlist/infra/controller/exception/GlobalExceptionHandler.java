@@ -1,6 +1,7 @@
 package com.wishlist.wishlist.infra.controller.exception;
 
 import com.wishlist.wishlist.domain.exception.ItemNotFoundException;
+import com.wishlist.wishlist.domain.exception.WishlistLimitExceededException;
 import com.wishlist.wishlist.domain.exception.WishlistNotFoundException;
 import com.wishlist.wishlist.infra.controller.dto.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +49,20 @@ public class GlobalExceptionHandler {
                 .path(request.getRequestURI())
                 .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(WishlistLimitExceededException.class)
+    public ResponseEntity<ErrorResponse> handleWishlistLimitExceeded(
+            WishlistLimitExceededException ex,
+            HttpServletRequest request) {
+        log.warn("WishlistLimitExceededException - path: {}, message: {}", 
+                request.getRequestURI(), ex.getMessage());
+        ErrorResponse error = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .timestamp(LocalDateTime.now())
+                .path(request.getRequestURI())
+                .build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

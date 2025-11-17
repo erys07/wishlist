@@ -3,6 +3,7 @@ package com.wishlist.wishlist.application.usecase;
 import com.wishlist.wishlist.application.dto.AddItemInput;
 import com.wishlist.wishlist.application.dto.AddItemOutput;
 import com.wishlist.wishlist.application.service.WishlistService;
+import com.wishlist.wishlist.domain.exception.WishlistLimitExceededException;
 import com.wishlist.wishlist.domain.model.Wishlist;
 import com.wishlist.wishlist.domain.model.WishlistItem;
 import com.wishlist.wishlist.domain.repository.WishlistRepository;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 public class AddItemUseCaseImpl implements AddItemUseCase {
 
     private static final Logger log = LoggerFactory.getLogger(AddItemUseCaseImpl.class);
+    private static final int MAX_ITEMS = 20;
 
     private final WishlistRepository wishlistRepository;
     private final WishlistService wishlistService;
@@ -37,22 +39,25 @@ public class AddItemUseCaseImpl implements AddItemUseCase {
             log.debug("Wishlist not found, creating new wishlist for userId: {}", input.getUserId());
         }
 
-        boolean exists = wishlist.getItems().stream()
-                .anyMatch(i -> i.getItemId().equals(input.getItemId()));
+        WishlistItem existingItem = wishlist.getItems().stream()
+                .filter(i -> i.getItemId().equals(input.getItemId()))
+                .findFirst()
+                .orElse(null);
 
-        if (exists) {
+        if (existingItem != null) {
             log.debug("Item already exists in wishlist - userId: {}, itemId: {}", 
                     input.getUserId(), input.getItemId());
-            WishlistItem existingItem = wishlist.getItems().stream()
-                    .filter(i -> i.getItemId().equals(input.getItemId()))
-                    .findFirst()
-                    .orElseThrow();
-            
             return AddItemOutput.builder()
                     .wishlistId(wishlist.getId())
                     .itemId(existingItem.getItemId())
                     .name(existingItem.getName())
                     .build();
+        }
+
+        if (wishlist.getItems().size() >= MAX_ITEMS) {
+            log.warn("Wishlist limit exceeded for userId: {}, current size: {}", 
+                    input.getUserId(), wishlist.getItems().size());
+            throw new WishlistLimitExceededException(input.getUserId(), wishlist.getItems().size());
         }
 
         log.debug("Adding new item to wishlist - userId: {}, itemId: {}, name: {}", 
