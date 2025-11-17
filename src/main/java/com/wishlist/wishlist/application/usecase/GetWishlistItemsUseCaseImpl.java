@@ -2,6 +2,7 @@ package com.wishlist.wishlist.application.usecase;
 
 import com.wishlist.wishlist.application.dto.GetWishlistItemsInput;
 import com.wishlist.wishlist.application.dto.GetWishlistItemsOutput;
+import com.wishlist.wishlist.domain.exception.WishlistNotFoundException;
 import com.wishlist.wishlist.domain.model.Wishlist;
 import com.wishlist.wishlist.domain.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class GetWishlistItemsUseCaseImpl implements GetWishlistItemsUseCase {
     public GetWishlistItemsOutput execute(GetWishlistItemsInput input) {
 
         Wishlist wishlist = wishlistRepository.findByUserId(input.getUserId())
-                .orElseThrow(() -> new RuntimeException("Wishlist not found"));
+                .orElseThrow(() -> new WishlistNotFoundException(input.getUserId()));
 
         List<GetWishlistItemsOutput.Item> items = wishlist.getItems() != null
                 ? wishlist.getItems().stream()

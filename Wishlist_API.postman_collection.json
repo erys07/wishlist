@@ -1,0 +1,118 @@
+{
+	"info": {
+		"_postman_id": "wishlist-api-collection",
+		"name": "Wishlist API",
+		"description": "Collection para testar a API de Wishlist",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Add Item",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"userId\": \"{{userId}}\",\n    \"itemId\": \"{{itemId}}\",\n    \"name\": \"Produto Exemplo\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/wishlist/item",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"wishlist",
+						"item"
+					]
+				},
+				"description": "Adiciona um item à wishlist do usuário. Se a wishlist não existir, ela será criada automaticamente."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Items",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/wishlist/{{userId}}/items",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"wishlist",
+						"{{userId}}",
+						"items"
+					]
+				},
+				"description": "Retorna todos os itens da wishlist do usuário"
+			},
+			"response": []
+		},
+		{
+			"name": "Check Item Exists",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/wishlist/{{userId}}/items/{{itemId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"wishlist",
+						"{{userId}}",
+						"items",
+						"{{itemId}}"
+					]
+				},
+				"description": "Verifica se um item específico existe na wishlist do usuário. Retorna false se a wishlist não existir."
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Item",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/wishlist/{{userId}}/items/{{itemId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"wishlist",
+						"{{userId}}",
+						"items",
+						"{{itemId}}"
+					]
+				},
+				"description": "Remove um item da wishlist do usuário"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "user123",
+			"type": "string"
+		},
+		{
+			"key": "itemId",
+			"value": "item001",
+			"type": "string"
+		}
+	]
+}
+
