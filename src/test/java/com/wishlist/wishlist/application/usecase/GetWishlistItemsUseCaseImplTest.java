@@ -3,7 +3,6 @@ package com.wishlist.wishlist.application.usecase;
 import com.wishlist.wishlist.application.dto.GetWishlistItemsInput;
 import com.wishlist.wishlist.application.dto.GetWishlistItemsOutput;
 import com.wishlist.wishlist.application.service.WishlistService;
-import com.wishlist.wishlist.domain.exception.WishlistNotFoundException;
 import com.wishlist.wishlist.domain.model.Wishlist;
 import com.wishlist.wishlist.domain.model.WishlistItem;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -98,14 +96,15 @@ class GetWishlistItemsUseCaseImplTest {
     }
 
     @Test
-    @DisplayName("Given a non-existent wishlist, when getting items, then should throw WishlistNotFoundException")
-    void givenNonExistentWishlist_whenGettingItems_thenShouldThrowException() {
+    @DisplayName("Given a non-existent wishlist, when getting items, then should return empty list")
+    void givenNonExistentWishlist_whenGettingItems_thenShouldReturnEmptyList() {
         when(wishlistService.findWishlist(userId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> getWishlistItemsUseCase.execute(input))
-                .isInstanceOf(WishlistNotFoundException.class)
-                .hasMessageContaining("Wishlist not found")
-                .hasMessageContaining(userId);
+        GetWishlistItemsOutput output = getWishlistItemsUseCase.execute(input);
+
+        assertThat(output).isNotNull();
+        assertThat(output.getItems()).isNotNull();
+        assertThat(output.getItems()).isEmpty();
 
         verify(wishlistService).findWishlist(userId);
     }
