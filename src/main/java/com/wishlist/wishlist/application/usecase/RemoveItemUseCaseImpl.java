@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +21,7 @@ public class RemoveItemUseCaseImpl implements RemoveItemUseCase {
     private final WishlistService wishlistService;
 
     @Override
+    @Transactional
     public void execute(RemoveItemInput input) {
         log.debug("Executing RemoveItemUseCase - userId: {}, itemId: {}", 
                 input.getUserId(), input.getItemId());
