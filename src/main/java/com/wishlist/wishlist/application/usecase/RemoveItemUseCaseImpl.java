@@ -1,6 +1,7 @@
 package com.wishlist.wishlist.application.usecase;
 
 import com.wishlist.wishlist.application.dto.RemoveItemInput;
+import com.wishlist.wishlist.application.service.WishlistService;
 import com.wishlist.wishlist.domain.exception.WishlistNotFoundException;
 import com.wishlist.wishlist.domain.model.Wishlist;
 import com.wishlist.wishlist.domain.repository.WishlistRepository;
@@ -16,27 +17,25 @@ public class RemoveItemUseCaseImpl implements RemoveItemUseCase {
     private static final Logger log = LoggerFactory.getLogger(RemoveItemUseCaseImpl.class);
 
     private final WishlistRepository wishlistRepository;
+    private final WishlistService wishlistService;
 
     @Override
     public void execute(RemoveItemInput input) {
         log.debug("Executing RemoveItemUseCase - userId: {}, itemId: {}", 
                 input.getUserId(), input.getItemId());
 
-        Wishlist wishlist = wishlistRepository.findByUserId(input.getUserId())
+        Wishlist wishlist = wishlistService.findWishlist(input.getUserId())
                 .orElseThrow(() -> {
                     log.warn("Wishlist not found for userId: {}", input.getUserId());
                     return new WishlistNotFoundException(input.getUserId());
                 });
 
         log.debug("Found wishlist - wishlistId: {}, items count before removal: {}", 
-                wishlist.getId(), wishlist.getItems() != null ? wishlist.getItems().size() : 0);
+                wishlist.getId(), wishlist.getItems().size());
 
-        boolean removed = false;
-        if (wishlist.getItems() != null) {
-            removed = wishlist.getItems().removeIf(
-                    item -> item.getItemId().equals(input.getItemId())
-            );
-        }
+        boolean removed = wishlist.getItems().removeIf(
+                item -> item.getItemId().equals(input.getItemId())
+        );
 
         if (removed) {
             log.debug("Item removed from wishlist - userId: {}, itemId: {}", 

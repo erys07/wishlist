@@ -2,8 +2,8 @@ package com.wishlist.wishlist.application.usecase;
 
 import com.wishlist.wishlist.application.dto.ContainsItemInput;
 import com.wishlist.wishlist.application.dto.ContainsItemOutput;
+import com.wishlist.wishlist.application.service.WishlistService;
 import com.wishlist.wishlist.domain.model.Wishlist;
-import com.wishlist.wishlist.domain.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +17,14 @@ public class ItemExistsInWishlistUseCaseImpl implements ItemExistsInWishlistUseC
 
     private static final Logger log = LoggerFactory.getLogger(ItemExistsInWishlistUseCaseImpl.class);
 
-    private final WishlistRepository wishlistRepository;
+    private final WishlistService wishlistService;
 
     @Override
     public ContainsItemOutput execute(ContainsItemInput input) {
         log.debug("Executing ItemExistsInWishlistUseCase - userId: {}, itemId: {}", 
                 input.getUserId(), input.getItemId());
 
-        Optional<Wishlist> wishlistOpt = wishlistRepository.findByUserId(input.getUserId());
+        Optional<Wishlist> wishlistOpt = wishlistService.findWishlist(input.getUserId());
 
         if (wishlistOpt.isEmpty()) {
             log.debug("Wishlist not found for userId: {}, returning false", input.getUserId());
@@ -32,9 +32,8 @@ public class ItemExistsInWishlistUseCaseImpl implements ItemExistsInWishlistUseC
         }
 
         Wishlist wishlist = wishlistOpt.get();
-        boolean exists = wishlist.getItems() != null &&
-                wishlist.getItems().stream()
-                        .anyMatch(item -> item.getItemId().equals(input.getItemId()));
+        boolean exists = wishlist.getItems().stream()
+                .anyMatch(item -> item.getItemId().equals(input.getItemId()));
 
         log.debug("Item exists check completed - userId: {}, itemId: {}, exists: {}", 
                 input.getUserId(), input.getItemId(), exists);

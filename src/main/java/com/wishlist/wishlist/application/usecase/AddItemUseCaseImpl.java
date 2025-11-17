@@ -2,6 +2,7 @@ package com.wishlist.wishlist.application.usecase;
 
 import com.wishlist.wishlist.application.dto.AddItemInput;
 import com.wishlist.wishlist.application.dto.AddItemOutput;
+import com.wishlist.wishlist.application.service.WishlistService;
 import com.wishlist.wishlist.domain.model.Wishlist;
 import com.wishlist.wishlist.domain.model.WishlistItem;
 import com.wishlist.wishlist.domain.repository.WishlistRepository;
@@ -19,13 +20,14 @@ public class AddItemUseCaseImpl implements AddItemUseCase {
     private static final Logger log = LoggerFactory.getLogger(AddItemUseCaseImpl.class);
 
     private final WishlistRepository wishlistRepository;
+    private final WishlistService wishlistService;
 
     @Override
     public AddItemOutput execute(AddItemInput input) {
         log.debug("Executing AddItemUseCase - userId: {}, itemId: {}", 
                 input.getUserId(), input.getItemId());
 
-        Wishlist wishlist = wishlistRepository.findByUserId(input.getUserId())
+        Wishlist wishlist = wishlistService.findWishlist(input.getUserId())
                 .orElse(Wishlist.builder()
                         .userId(input.getUserId())
                         .items(new ArrayList<>())
@@ -33,13 +35,6 @@ public class AddItemUseCaseImpl implements AddItemUseCase {
 
         if (wishlist.getId() == null) {
             log.debug("Wishlist not found, creating new wishlist for userId: {}", input.getUserId());
-        } else {
-            log.debug("Found existing wishlist - wishlistId: {}, items count: {}", 
-                    wishlist.getId(), wishlist.getItems() != null ? wishlist.getItems().size() : 0);
-        }
-
-        if (wishlist.getItems() == null) {
-            wishlist.setItems(new ArrayList<>());
         }
 
         boolean exists = wishlist.getItems().stream()
