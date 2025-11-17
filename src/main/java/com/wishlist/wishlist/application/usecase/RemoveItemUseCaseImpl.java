@@ -5,26 +5,46 @@ import com.wishlist.wishlist.domain.exception.WishlistNotFoundException;
 import com.wishlist.wishlist.domain.model.Wishlist;
 import com.wishlist.wishlist.domain.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class RemoveItemUseCaseImpl implements RemoveItemUseCase {
 
+    private static final Logger log = LoggerFactory.getLogger(RemoveItemUseCaseImpl.class);
+
     private final WishlistRepository wishlistRepository;
 
     @Override
     public void execute(RemoveItemInput input) {
-        Wishlist wishlist = wishlistRepository.findByUserId(input.getUserId())
-                .orElseThrow(() -> new WishlistNotFoundException(input.getUserId()));
+        log.debug("Executing RemoveItemUseCase - userId: {}, itemId: {}", 
+                input.getUserId(), input.getItemId());
 
+        Wishlist wishlist = wishlistRepository.findByUserId(input.getUserId())
+                .orElseThrow(() -> {
+                    log.warn("Wishlist not found for userId: {}", input.getUserId());
+                    return new WishlistNotFoundException(input.getUserId());
+                });
+
+        log.debug("Found wishlist - wishlistId: {}, items count before removal: {}", 
+                wishlist.getId(), wishlist.getItems() != null ? wishlist.getItems().size() : 0);
+
+        boolean removed = false;
         if (wishlist.getItems() != null) {
-            wishlist.getItems().removeIf(
+            removed = wishlist.getItems().removeIf(
                     item -> item.getItemId().equals(input.getItemId())
             );
         }
 
-        wishlistRepository.save(wishlist);
-
+        if (removed) {
+            log.debug("Item removed from wishlist - userId: {}, itemId: {}", 
+                    input.getUserId(), input.getItemId());
+            wishlistRepository.save(wishlist);
+        } else {
+            log.warn("Item not found in wishlist - userId: {}, itemId: {}", 
+                    input.getUserId(), input.getItemId());
+        }
     }
 }
