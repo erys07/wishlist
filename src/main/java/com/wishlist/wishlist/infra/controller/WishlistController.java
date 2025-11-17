@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class WishlistController {
         AddItemOutput output = addItemUseCase.execute(input);
         log.info("Item added successfully - wishlistId: {}, itemId: {}", 
                 output.getWishlistId(), output.getItemId());
-        return ResponseEntity.ok(output);
+        return ResponseEntity.status(HttpStatus.CREATED).body(output);
     }
 
     @DeleteMapping("/{userId}/items/{itemId}")
@@ -49,7 +50,7 @@ public class WishlistController {
                 .build();
         removeItemUseCase.execute(input);
         log.info("Item removed successfully - userId: {}, itemId: {}", userId, itemId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/{userId}/items")
