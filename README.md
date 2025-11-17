@@ -1,28 +1,51 @@
-# Wishlist API - Documentação
+# Wishlist API
 
-## Como executar
+API REST para gerenciamento de lista de desejos (Wishlist) de clientes em um e-commerce.
 
-1. **Subir os containers:**
-   ```bash
-   docker-compose up --build
-   ```
+## 🚀 Tecnologias
 
-2. **A API estará disponível em:**
-   ```
-   http://localhost:8080
-   ```
+- Java 25
+- Spring Boot 4.0.0-SNAPSHOT
+- MongoDB 7.0
+- Maven
+- Docker & Docker Compose
 
-3. **Importar a collection no Postman:**
-   - Abra o Postman
-   - Clique em "Import"
-   - Selecione o arquivo `Wishlist_API.postman_collection.json`
+## 📋 Como executar
 
-## Endpoints
+### Usando Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+A API estará disponível em: `http://localhost:8080`
+
+### Executar localmente
+
+```bash
+# Iniciar MongoDB
+docker-compose up mongodb -d
+
+# Executar aplicação
+./mvnw spring-boot:run
+```
+
+## 🧪 Executar testes
+
+```bash
+# Executar todos os testes
+./mvnw test
+
+# Executar testes e gerar relatório de cobertura
+./mvnw clean test jacoco:report
+```
+
+## 📚 Endpoints
 
 ### 1. Adicionar Item
 **POST** `/wishlist/item`
 
-**Request Body:**
+**Request:**
 ```json
 {
     "userId": "user123",
@@ -31,7 +54,7 @@
 }
 ```
 
-**Response (200 OK):**
+**Response (201 Created):**
 ```json
 {
     "wishlistId": "wishlist-id",
@@ -39,6 +62,13 @@
     "name": "Produto Exemplo"
 }
 ```
+
+**Regras:**
+- Limite máximo de **20 itens** por wishlist
+- Se o item já existir, retorna os dados do item existente
+- Se a wishlist não existir, ela será criada automaticamente
+
+---
 
 ### 2. Listar Itens
 **GET** `/wishlist/{userId}/items`
@@ -55,6 +85,8 @@
 }
 ```
 
+---
+
 ### 3. Verificar se Item Existe
 **GET** `/wishlist/{userId}/items/{itemId}`
 
@@ -65,26 +97,60 @@
 }
 ```
 
+---
+
 ### 4. Remover Item
 **DELETE** `/wishlist/{userId}/items/{itemId}`
 
-**Response (200 OK):**
+**Response (204 No Content):**
 ```
-(No content)
+(Sem conteúdo)
 ```
 
-## Variáveis do Postman
+---
 
-A collection inclui as seguintes variáveis que podem ser alteradas:
+## ⚠️ Tratamento de Erros
+
+Erros retornam no formato:
+
+```json
+{
+    "message": "Mensagem de erro descritiva",
+    "timestamp": "2025-11-17T10:30:00",
+    "path": "/wishlist/item"
+}
+```
+
+**Códigos de Status:**
+- `201 Created`: Item adicionado
+- `200 OK`: Operação bem-sucedida
+- `204 No Content`: Item removido
+- `400 Bad Request`: Validação falhou ou limite excedido
+- `404 Not Found`: Recurso não encontrado
+- `500 Internal Server Error`: Erro interno
+
+---
+
+## 📖 Postman
+
+Importe a collection: `Wishlist_API.postman_collection.json`
+
+**Variáveis:**
 - `baseUrl`: `http://localhost:8080`
 - `userId`: `user123`
 - `itemId`: `item001`
 
-## Fluxo de Teste Recomendado
+---
 
-1. **Adicionar Item** - Adiciona um item à wishlist
-2. **Listar Itens** - Verifica se o item foi adicionado
-3. **Verificar Item Existe** - Confirma que o item existe
-4. **Remover Item** - Remove o item
-5. **Verificar Item Existe** - Confirma que o item foi removido (deve retornar `false`)
+## 🏗️ Arquitetura
 
+Clean Architecture com separação em camadas:
+- `domain/`: Entidades, exceções, repositórios
+- `application/`: Casos de uso, DTOs, serviços
+- `infra/`: Controllers, configurações
+
+---
+
+## 📊 Testes
+
+40 testes cobrindo controllers, use cases, services e exceptions.
